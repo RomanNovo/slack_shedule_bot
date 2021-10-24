@@ -8,7 +8,7 @@ Fill the .env file like .env.example
 
 Open port on docker-compose
 
-Requires subscription to the `team_join` event on slack.
+Create slack app from manifest example
 
 Requires the following oauth permissions in your slack app.
 
