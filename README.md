@@ -4,6 +4,10 @@ Sends new users a direct message after some time from them mentioned.
 
 ### Configuration and Deployment
 
+Fill the .env file like .env.example
+
+Open port on docker-compose
+
 Requires subscription to the `team_join` event on slack.
 
 Requires the following oauth permissions in your slack app.

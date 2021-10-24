@@ -21,6 +21,16 @@ def initDbSchema():
     ''')
     dbCursor.close()
 
+def checkDbSchema():
+    queryResult = BaseConnect.execute('''
+        SELECT name FROM sqlite_master WHERE type='table' AND name='SheduledMessage';
+    ''')
+    tables = queryResult.fetchall()
+    if not tables :
+        initDbSchema()  
+    else:
+        print("db initialized")
+
 def storeTask(task: dict):
     task["getters"] = json.dumps(task["getters"])
     queryResult = BaseConnect.execute(f'''

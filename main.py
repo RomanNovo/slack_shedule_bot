@@ -6,11 +6,15 @@ import re
 import json
 
 from slack_bolt.oauth import OAuthFlow
+from slack_sdk.web.client import WebClient
 import dbAdapter
 
 from slack_bolt import App as Slack_App
 from slack_bolt.adapter.fastapi import SlackRequestHandler
 
+configFile = open("data/config.json",)
+botConfig = json.load(configFile)
+configFile.close()
 
 oauth_flow=OAuthFlow.sqlite3(
         database="./data/lite.db",
@@ -30,6 +34,7 @@ oauth_flow=OAuthFlow.sqlite3(
             "im:write",
             "incoming-webhook",
             "reminders:write",
+            "reactions:write",
             "usergroups:read",
             "mpim:write",
             "channels:manage",
@@ -38,6 +43,7 @@ oauth_flow=OAuthFlow.sqlite3(
         token_rotation_expiration_minutes=60 * 24,  # for testing
     )
 
+dbAdapter.checkDbSchema()
 
 slack_app = Slack_App(
     signing_secret=os.environ["SLACK_SIGNING_SECRET"],
@@ -48,9 +54,10 @@ slack_app = Slack_App(
 
 app_handler = SlackRequestHandler(slack_app)
 
-mainChannel = "C02FM6KGYS3"
-ownId = "U02GBHU8LCT"
 
+# React to message
+def placeReactionToMessage(client: WebClient, reaction, time_ts, channel):
+    return client.reactions_add(channel=channel, name=reaction, timestamp=time_ts)
 
 # Store message data to deta Base
 def storeSheduledMessage(channel,team_id, obj, message_ts,  time):
@@ -64,8 +71,6 @@ def storeSheduledMessage(channel,team_id, obj, message_ts,  time):
     })
 
 # Return link to message
-
-
 def getSlackUserMentions(text):
     matchesUsers = re.findall(r"(?:<@(\w+)>)", text)
     return matchesUsers
@@ -88,22 +93,22 @@ def custom_error_handler(error, body, response, logger, ack):
 @slack_app.event("app_mention")
 def handle_mention(body, ack, say, logger, client):
     try:
-        print(client.token)
         event = body["event"]
         ts = int(float(event["ts"]))
         sheduledTs = ts + 10
         channel = event["channel"]
         team_id = event["team"]
+        ownId = body["authorizations"][0]["user_id"]
         users = getSlackUserMentions(event["text"])
         groups = getSlackUserGroupsMentions(event["text"])
         users.remove(f"{ownId}")
         if len(groups) > 0 or len(users) > 0:
-            say(f"Groups {groups} and users {users} will be mentioned in 2 hours ")
+            # say(f"Groups {groups} and users {users} will be mentioned in 2 hours ")
+            placeReactionToMessage(channel=channel, reaction=botConfig["REACTION_ACCEPT"], time_ts=event["ts"], client=client)
             storeSheduledMessage(
-                channel,team_id, {"groups": groups, "users": users}, event["ts"], sheduledTs)  
-            print(json.dumps(body))    
+                channel, team_id, {"groups": groups, "users": users}, event["ts"], sheduledTs)
         else:
-            say("You must mention group after Bot")
+            say(botConfig["ERROR_USAGE"])
     except Exception as e:
         say("Error: " + str(e))
 

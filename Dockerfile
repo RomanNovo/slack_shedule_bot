@@ -15,12 +15,10 @@ RUN apt-get update -y
 
 RUN apt-get install -y cron htop vim
 
-COPY ./cron-worker /etc/cron.d/cron-worker
-
-RUN chmod 0644 /etc/cron.d/cron-worker
 RUN touch /var/log/cron.log
 
-RUN /usr/bin/crontab /etc/cron.d/cron-worker
 RUN chmod +x worker_entrypoint.sh
+
+VOLUME [ "/app/data" ]
 
 CMD ["uvicorn", "main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]

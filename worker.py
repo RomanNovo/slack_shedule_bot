@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv(dotenv_path="/app/.env")
 
-from main import slack_app
+from main import slack_app, botConfig
 
 
 
@@ -81,9 +81,9 @@ def performTask(client: WebClient, msg):
         convRes = client.conversations_open(token=getLatestToken(), users=user)
         if convRes.data["ok"]:
             chatId = convRes.data["channel"]["id"]
-            text = f"You has been mentioned in <#{channelName}>"
+            text = botConfig["MENTION_MESSAGE"] + f" <#{channelName}>"
             if msgLink:
-                text += f" at <{msgLink}>"
+                text += f"  <{msgLink}|сообщение>"
             result = client.chat_postMessage(
                 token=getLatestToken(),
                 channel=chatId,
