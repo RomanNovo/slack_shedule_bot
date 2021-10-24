@@ -1,0 +1,46 @@
+_metadata:
+  major_version: 1
+  minor_version: 1
+display_information:
+  name: BOT_NAME
+features:
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: false
+    messages_tab_read_only_enabled: true
+  bot_user:
+    display_name: BOT_NAME
+    always_online: true
+oauth_config:
+  redirect_urls:
+    - https://URL_TO_HOSTING/slack/oauth_redirect
+  scopes:
+    bot:
+      - app_mentions:read
+      - channels:history
+      - channels:read
+      - chat:write
+      - chat:write.customize
+      - chat:write.public
+      - groups:history
+      - groups:read
+      - im:history
+      - im:write
+      - incoming-webhook
+      - reminders:write
+      - usergroups:read
+      - reactions:write
+      - mpim:write
+      - channels:manage
+      - groups:write
+settings:
+  event_subscriptions:
+    request_url: https://URL_TO_HOSTING/slack/events
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: true
