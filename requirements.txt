@@ -1,0 +1,8 @@
+fastapi
+requests
+slack_bolt
+python-dotenv
+gunicorn
+uvicorn
+pytimeparse
+fastapi_utils
