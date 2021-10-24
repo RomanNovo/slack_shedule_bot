@@ -28,10 +28,10 @@ client = WebClient()
 client.retry_handlers
 
 
-def getMessageLink(client: WebClient, channel, ts):
+def getMessageLink(client: WebClient, channel, ts, team_id):
     try:
-        res = client.chat_getPermalink(token=getLatestToken(
-        ), channel=channel, message_ts="{:.6f}".format(float(ts)))
+        res = client.chat_getPermalink(token=getLatestToken(team_id),
+         channel=channel, message_ts="{:.6f}".format(float(ts)))
         if res.data["ok"]:
             return res.data["permalink"]
     except Exception as err:
@@ -42,18 +42,18 @@ def getMessageLink(client: WebClient, channel, ts):
 # Return list of group users
 
 
-def getSlackGroupUsers(client: WebClient, groupId):
+def getSlackGroupUsers(client: WebClient, groupId,team_id):
     groupResult = client.usergroups_users_list(
-        token=getLatestToken(), usergroup=groupId)
+        token=getLatestToken(team_id), usergroup=groupId)
     if groupResult.data["ok"]:
         return groupResult.data["users"]
     else:
         return []
 
 
-def getBotData():
+def getBotData(team_id):
     bot: Bot = slack_app.installation_store.find_bot(
-        team_id="T02FV5FP1DL", enterprise_id="")
+        team_id=team_id, enterprise_id="")
     newBot: Bot = rotator.perform_bot_token_rotation(
         bot=bot, minutes_before_expiration=20)
     if newBot:
@@ -62,30 +62,31 @@ def getBotData():
     return bot
 
 
-def getLatestToken():
-    bot = getBotData()
+def getLatestToken(team_id):
+    bot = getBotData(team_id)
     return bot.bot_token
 
 
 def performTask(client: WebClient, msg):
     users = msg["getters"]["users"]
     groups = msg["getters"]["groups"]
+    team_id = msg["team_id"]
     channelName = msg["channel"]
     messageTs = str(msg["message_ts"]).replace(',', '.')
     for group in groups:
-        users += getSlackGroupUsers(client, group)
+        users += getSlackGroupUsers(client, group, team_id)
     users = list(set(users))
     print(f"{users} gonna be mentioned")
-    msgLink = getMessageLink(client, channelName, messageTs)
+    msgLink = getMessageLink(client, channelName, messageTs, team_id)
     for user in users:
-        convRes = client.conversations_open(token=getLatestToken(), users=user)
+        convRes = client.conversations_open(token=getLatestToken(team_id), users=user)
         if convRes.data["ok"]:
             chatId = convRes.data["channel"]["id"]
             text = botConfig["MENTION_MESSAGE"] + f" <#{channelName}>"
             if msgLink:
                 text += f"  <{msgLink}|сообщение>"
             result = client.chat_postMessage(
-                token=getLatestToken(),
+                token=getLatestToken(team_id),
                 channel=chatId,
                 text=text)
             if result["ok"]:
@@ -104,7 +105,8 @@ def proceed():
 
     result = ""
     for msg in msgs:
-        bot = getBotData()
+        team_id = msg["team_id"]
+        bot = getBotData(team_id)
         client = WebClient()
         client.token = bot.bot_token
         try:
