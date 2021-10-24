@@ -1,0 +1,1 @@
+* * * * * cd /app && python worker.py >> /var/log/cron.log 2>&1

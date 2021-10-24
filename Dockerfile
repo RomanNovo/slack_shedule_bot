@@ -15,18 +15,12 @@ RUN apt-get update -y
 
 RUN apt-get install -y cron htop vim
 
-COPY ./crontab /etc/cron.d
+COPY ./cron-worker /etc/cron.d/cron-worker
 
-RUN chmod -R 0644 /etc/cron.d
-
-RUN crontab /etc/cron.d/cron-worker
-
+RUN chmod 0644 /etc/cron.d/cron-worker
 RUN touch /var/log/cron.log
 
-# Creates a non-root user with an explicit UID and adds permission to access the /app folder
-# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
-RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+RUN /usr/bin/crontab /etc/cron.d/cron-worker
+RUN chmod +x worker_entrypoint.sh
 
-# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 CMD ["uvicorn", "main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]

@@ -8,7 +8,11 @@ import dbAdapter
 import datetime
 import os
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="/app/.env")
+
 from main import slack_app
+
 
 
 client_id = os.environ["SLACK_CLIENT_ID"]
@@ -51,7 +55,7 @@ def getBotData():
     bot: Bot = slack_app.installation_store.find_bot(
         team_id="T02FV5FP1DL", enterprise_id="")
     newBot: Bot = rotator.perform_bot_token_rotation(
-        bot=bot, minutes_before_expiration=120)
+        bot=bot, minutes_before_expiration=20)
     if newBot:
         bot = newBot
         slack_app.installation_store.save_bot(bot)
@@ -110,4 +114,4 @@ def proceed():
 
     return result
 
-
+proceed()

@@ -14,9 +14,8 @@ services:
       - 8000:8000
   slackbotlocal-worker:
     image: slackbotlocal
-    env_file: .env  
-    user: root
-    entrypoint: ["cron", "-f"]
+    env_file: .env
+    command: ["./worker_entrypoint.sh"]
     volumes:
       - "./data:/app/data"
       - "./.env:/app/.env"    
