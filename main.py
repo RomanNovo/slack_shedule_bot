@@ -95,7 +95,7 @@ def handle_mention(body, ack, say, logger, client):
     try:
         event = body["event"]
         ts = int(float(event["ts"]))
-        sheduledTs = ts + 10
+        sheduledTs = ts + botConfig["SECONDS_BEFORE_MENTION"]
         channel = event["channel"]
         team_id = event["team"]
         ownId = body["authorizations"][0]["user_id"]

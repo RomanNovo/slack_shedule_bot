@@ -1,5 +1,6 @@
 {
     "REACTION_ACCEPT": "thumbsup",
     "ERROR_USAGE": "Необходимо упомянуть группу и/или пользователя после упоминания бота",
-    "MENTION_MESSAGE": "Вас упомянули в сообщении"
+    "MENTION_MESSAGE": "Вас упомянули в сообщении",
+    "SECONDS_BEFORE_MENTION": 7200
 }
